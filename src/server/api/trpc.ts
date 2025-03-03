@@ -9,6 +9,7 @@
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "~/server/db";
 
@@ -104,3 +105,24 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * This procedure ensures that the user is authenticated before running the procedure.
+ * If the user is not authenticated, it will throw an error.
+ */
+export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({ next, ctx }) => {
+  const user = await currentUser();
+  
+  if (!user) {
+    throw new Error("Not authenticated");
+  }
+  
+  return next({
+    ctx: {
+      ...ctx,
+      user,
+    },
+  });
+});
