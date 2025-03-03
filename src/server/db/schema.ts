@@ -27,6 +27,8 @@ export const users = createTable(
   {
     id: varchar("id", { length: 256 }).primaryKey(),
     username: varchar("username", { length: 256 }).notNull().unique(),
+    firstName: varchar("first_name", { length: 256 }),
+    lastName: varchar("last_name", { length: 256 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
