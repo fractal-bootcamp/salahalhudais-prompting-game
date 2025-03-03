@@ -1,47 +1,42 @@
-import { ClerkProvider } from "@clerk/nextjs";
-import { Geist } from "next/font/google";
-import "~/styles/globals.css";
-import { TRPCReactProvider } from "~/trpc/react";
-import { Navigation } from "./_components/Navigation";
-import { ThemeProvider } from "~/components/theme-provider";
-import { Toaster } from "sonner";
+import type React from "react"
+import "./globals.css"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import { ClerkProvider } from "@clerk/nextjs"
+import { ThemeProvider } from "~/components/theme-provider"
+import { Navigation } from "./_components/Navigation"
+import { TRPCReactProvider } from "~/trpc/react"
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-});
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "Artistic Expressions Gallery",
+  description: "A vibrant online art gallery where creativity finds its home",
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${geist.variable} font-sans antialiased`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ClerkProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <TRPCReactProvider>
-              <div className="relative flex min-h-screen flex-col">
-                <Navigation />
-                <main className="flex-1">
-                  <div className="container py-6">
-                    {children}
-                  </div>
-                </main>
-                <footer className="border-t py-6">
-                  <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-                    <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                      © 2023 Generative Art. All rights reserved.
-                    </p>
-                  </div>
-                </footer>
-              </div>
-              <Toaster richColors position="bottom-right" />
+              <Navigation />
+              <main>{children}</main>
             </TRPCReactProvider>
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
-  );
+        </ClerkProvider>
+      </body>
+    </html>
+  )
 }
+

@@ -1,55 +1,74 @@
-// src/app/page.tsx
-import { api } from "~/trpc/server";
-import { ArtCard, ArtConfig, ArtPiece } from "./_components/ArtCard";
-import Link from "next/link";
+"use client"
+import Link from "next/link"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { Button } from "~/components/ui/button"
+import { ParticleBackground } from "~/components/particle-background"
+import { api } from "~/trpc/react"
+import { GalleryGrid } from "~/components/gallery-grid"
 
-interface RawArtPiece {
-  id: number;
-  title: string;
-  config: unknown;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-  user: {
-    id: string;
-    username: string;
-    createdAt: Date;
-    updatedAt: Date | null;
-  };
-  likeCount: number;
-  isLiked: boolean;
-}
-
-export default async function Home() {
-  const rawArts = await api.art.getAll();
-
-  // Transform the raw art pieces to ensure config is properly typed
-  const arts = rawArts.map(art => ({
-    ...art,
-    config: art.config as ArtConfig
-  }));
+export default function HomePage() {
+  const { data: artworks, isLoading } = api.art.getAll.useQuery();
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Generative Art Gallery</h1>
-        <p className="text-muted-foreground">
-          Explore amazing generative art created by our community
-        </p>
-      </div>
-      
-      {arts.length === 0 ? (
-        <div className="text-center py-12">
-          <h2 className="text-xl font-medium">No artwork yet</h2>
-          <p className="text-muted-foreground mt-2">Be the first to create something amazing!</p>
+    <div className="min-h-screen bg-white dark:bg-gray-950 relative overflow-hidden">
+      <ParticleBackground />
+
+      <main className="relative z-10">
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
+            <motion.h1
+              className="text-4xl md:text-6xl font-light text-gray-900 dark:text-gray-100 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              Artistry Collection
+            </motion.h1>
+            <motion.p
+              className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              A curated collection of exceptional art pieces from talented artists around the world
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <Link href="/create">
+                <Button className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 text-white px-8 py-6 rounded-lg text-lg">
+                  Create Your Art
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 dark:text-gray-400">Loading amazing artwork...</p>
+              </div>
+            ) : artworks && artworks.length > 0 ? (
+              <GalleryGrid artworks={artworks} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No artwork found. Be the first to create!</p>
+                <Link href="/create">
+                  <Button>Create Artwork</Button>
+                </Link>
+              </div>
+            )}
+          </motion.div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {arts.map((art) => (
-            <ArtCard key={art.id} art={art} />
-          ))}
-        </div>
-      )}
+      </main>
     </div>
-  );
+  )
 }
+

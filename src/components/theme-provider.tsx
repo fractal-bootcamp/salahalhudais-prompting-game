@@ -8,7 +8,6 @@ export function ThemeProvider({
   ...props
 }: {
   children: React.ReactNode;
-  [key: string]: any;
-}) {
+} & Record<string, any>) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 } 
