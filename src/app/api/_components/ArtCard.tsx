@@ -87,7 +87,7 @@ export function ArtCard({ art }: { art: ArtPiece }) {
   };
   
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] relative group">
+    <Card className="overflow-hidden">
       <CardHeader className="p-4">
         <div className="flex items-center justify-between">
           <HoverCard>
@@ -126,8 +126,8 @@ export function ArtCard({ art }: { art: ArtPiece }) {
           by @{art.user.username} • {new Date(art.createdAt).toLocaleDateString()}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-0 aspect-square relative overflow-hidden">
-        <div className="h-full w-full bg-muted/20 transition-transform duration-500 group-hover:scale-105">
+      <CardContent className="p-0 aspect-square">
+        <div className="h-full w-full bg-muted/20">
           <Canvas camera={{ position: [0, 0, 5] }}>
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} />
@@ -135,19 +135,16 @@ export function ArtCard({ art }: { art: ArtPiece }) {
             <OrbitControls enableZoom={false} />
           </Canvas>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
-          <p className="text-white font-medium text-center">{art.title} by @{art.user.username}</p>
-        </div>
       </CardContent>
       <CardFooter className="p-4 flex justify-between">
         <Button
           variant={isLiked ? "default" : "outline"}
           size="sm"
-          className="gap-1 transition-all duration-300 hover:scale-110"
+          className="gap-1"
           onClick={handleLike}
           disabled={likeMutation.isPending || unlikeMutation.isPending}
         >
-          <Heart className={`h-4 w-4 ${isLiked ? "fill-white" : ""} transition-transform duration-300 group-hover:scale-110 hover:animate-pulse`} />
+          <Heart className={`h-4 w-4 ${isLiked ? "fill-white" : ""}`} />
           {likeCount}
         </Button>
       </CardFooter>
