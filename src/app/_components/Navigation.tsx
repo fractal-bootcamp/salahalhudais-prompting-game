@@ -70,6 +70,19 @@ export function Navigation() {
                   <li>
                     <NavigationMenuLink asChild>
                       <a
+                        href="/game"
+                        className="block select-none space-y-1 rounded-md p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground hover:scale-[1.02]"
+                      >
+                        <div className="text-sm font-medium leading-none">Prompt Game</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Test your prompt engineering skills in our fun game
+                        </p>
+                      </a>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <a
                         href="/popular"
                         className="block select-none space-y-1 rounded-md p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground hover:scale-[1.02]"
                       >
@@ -89,6 +102,15 @@ export function Navigation() {
                   className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/create' ? 'navigation-active' : ''}`}
                 >
                   Create Art
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/game" legacyBehavior passHref>
+                <NavigationMenuLink 
+                  className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/game' ? 'navigation-active' : ''}`}
+                >
+                  Play Game
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
