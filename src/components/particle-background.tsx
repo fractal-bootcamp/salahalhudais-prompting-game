@@ -25,7 +25,7 @@ class Particle {
     this.speedX = Math.random() * 0.7 - 0.35
     this.speedY = Math.random() * 0.7 - 0.35
     this.opacity = Math.random() * 0.5 + 0.5
-    
+
     // Brighter, more saturated colors with explicit string type
     const colorOptions = [
       `rgba(147, 112, 219, ${this.opacity})`, // Purple
@@ -35,10 +35,11 @@ class Particle {
       `rgba(50, 205, 50, ${this.opacity})`,   // Lime Green
       `rgba(255, 165, 0, ${this.opacity})`,   // Orange
     ];
-    
+
     // Ensure we have a valid color by providing a default
-    this.color = colorOptions[Math.floor(Math.random() * colorOptions.length)] || colorOptions[0];
-    
+    const index = Math.floor(Math.random() * colorOptions.length);
+    this.color = index >= 0 && index < colorOptions.length ? colorOptions[index] : colorOptions[0];
+
     this.rising = Math.random() > 0.5
     this.wobbleOffset = Math.random() * Math.PI * 2
     this.wobbleSpeed = Math.random() * 0.02 + 0.01

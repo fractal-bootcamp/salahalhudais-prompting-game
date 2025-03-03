@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button"
 import { ParticleBackground } from "~/components/particle-background"
 import { api } from "~/trpc/react"
 import { GalleryGrid } from "~/components/gallery-grid"
+import { PaintbrushTitle } from "~/components/PaintBrushCanvas"
 
 export default function HomePage() {
   const { data: artworks, isLoading } = api.art.getAll.useQuery();
@@ -15,35 +16,16 @@ export default function HomePage() {
       <ParticleBackground />
 
       <main className="relative z-10">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
-            <motion.h1
-              className="text-4xl md:text-6xl font-light text-gray-900 dark:text-gray-100 mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+        <PaintbrushTitle />
+        
+        <div id="artworks" className="container mx-auto px-4 py-16 md:py-24">
+          <div className="flex justify-center mt-8 mb-16">
+            <a 
+              href="/create" 
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              Artistry Collection
-            </motion.h1>
-            <motion.p
-              className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              A curated collection of exceptional art pieces from talented artists around the world
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <Link href="/create">
-                <Button className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 text-white px-8 py-6 rounded-lg text-lg">
-                  Create Your Art
-                </Button>
-              </Link>
-            </motion.div>
+              Create Your Art
+            </a>
           </div>
 
           <motion.div

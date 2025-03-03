@@ -18,6 +18,8 @@ interface ArtPiece {
   user: {
     id: string;
     username: string;
+    firstName?: string;
+    lastName?: string;
   };
   likeCount: number;
   isLiked: boolean;
@@ -50,6 +52,46 @@ export function GalleryGrid({ artworks }: GalleryGridProps) {
       likeMutation.mutate({ artPieceId: id });
     }
   }
+
+  // Function to format username for display
+  const formatUsername = (user: { username: string; firstName?: string; lastName?: string }) => {
+    // If we have first name and last name, use them
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    
+    // If we have just first name, use it
+    if (user.firstName) {
+      return user.firstName;
+    }
+    
+    // Otherwise, format the username
+    const username = user.username;
+    
+    // If the username already looks like a proper name (no underscores, not starting with "user"),
+    // just return it as is with proper capitalization
+    if (!username.includes('_') && !username.startsWith('user')) {
+      return username;
+    }
+    
+    // Otherwise, apply the formatting logic for auto-generated usernames
+    // Remove the "@useruser_" prefix if it exists
+    let displayName = username.replace(/^@?useruser_/, "");
+    
+    // Remove any numeric suffix (like _2to_1741022217067)
+    displayName = displayName.replace(/_\d+to_\d+$/, "");
+    
+    // If the username is now empty, use "Artist" as fallback
+    if (!displayName || displayName.trim() === "") {
+      return "Artist";
+    }
+    
+    // Capitalize the first letter of each word
+    return displayName
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   // Function to render the art piece based on its config
   const renderArtPreview = (config: any) => {
@@ -91,11 +133,13 @@ export function GalleryGrid({ artworks }: GalleryGridProps) {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback>{item.user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>
+                    {item.user.firstName ? item.user.firstName.charAt(0).toUpperCase() : item.user.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white text-sm">{item.title}</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">by @{item.user.username}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">by {formatUsername(item.user)}</p>
                 </div>
               </div>
               <Button

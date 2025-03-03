@@ -85,12 +85,28 @@ export const artRouter = createTRPCRouter({
       // If not, create the user
       if (!existingUser) {
         try {
-          // Try to create user with their Clerk username
-          const baseUsername = user.username ?? `user${user.id.substring(0, 8)}`;
+          // Get user's name from Clerk
+          const firstName = user.firstName || '';
+          const lastName = user.lastName || '';
+          let displayName = '';
+
+          // Create a display name based on available information
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (user.username) {
+            displayName = user.username;
+          } else {
+            // Fallback to a portion of the user ID if no name is available
+            displayName = `user${user.id.substring(0, 8)}`;
+          }
           
           await ctx.db.insert(users).values({
             id: user.id,
-            username: baseUsername,
+            username: displayName,
+            firstName: firstName,
+            lastName: lastName,
           });
         } catch (error) {
           // If there's a unique constraint error, create with a timestamp suffix
@@ -100,6 +116,8 @@ export const artRouter = createTRPCRouter({
             await ctx.db.insert(users).values({
               id: user.id,
               username: uniqueUsername,
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
             });
           } else {
             // If it's some other error, rethrow it
@@ -133,12 +151,28 @@ export const artRouter = createTRPCRouter({
       // If not, create the user
       if (!existingUser) {
         try {
-          // Try to create user with their Clerk username
-          const baseUsername = user.username ?? `user${user.id.substring(0, 8)}`;
+          // Get user's name from Clerk
+          const firstName = user.firstName || '';
+          const lastName = user.lastName || '';
+          let displayName = '';
+
+          // Create a display name based on available information
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (user.username) {
+            displayName = user.username;
+          } else {
+            // Fallback to a portion of the user ID if no name is available
+            displayName = `user${user.id.substring(0, 8)}`;
+          }
           
           await ctx.db.insert(users).values({
             id: user.id,
-            username: baseUsername,
+            username: displayName,
+            firstName: firstName,
+            lastName: lastName,
           });
         } catch (error) {
           // If there's a unique constraint error, create with a timestamp suffix
@@ -148,6 +182,8 @@ export const artRouter = createTRPCRouter({
             await ctx.db.insert(users).values({
               id: user.id,
               username: uniqueUsername,
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
             });
           } else {
             // If it's some other error, rethrow it
@@ -189,11 +225,28 @@ export const artRouter = createTRPCRouter({
       // If not, create the user (same as in like mutation)
       if (!existingUser) {
         try {
-          const baseUsername = user.username ?? `user${user.id.substring(0, 8)}`;
+          // Get user's name from Clerk
+          const firstName = user.firstName || '';
+          const lastName = user.lastName || '';
+          let displayName = '';
+
+          // Create a display name based on available information
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (user.username) {
+            displayName = user.username;
+          } else {
+            // Fallback to a portion of the user ID if no name is available
+            displayName = `user${user.id.substring(0, 8)}`;
+          }
           
           await ctx.db.insert(users).values({
             id: user.id,
-            username: baseUsername,
+            username: displayName,
+            firstName: firstName,
+            lastName: lastName,
           });
         } catch (error) {
           if (error instanceof Error && error.message.includes('unique constraint')) {
@@ -202,6 +255,8 @@ export const artRouter = createTRPCRouter({
             await ctx.db.insert(users).values({
               id: user.id,
               username: uniqueUsername,
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
             });
           } else {
             throw error;
@@ -219,3 +274,5 @@ export const artRouter = createTRPCRouter({
         );
     }),
 });
+
+
