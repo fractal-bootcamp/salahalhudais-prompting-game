@@ -8,6 +8,13 @@
       "when": 1741036029664,
       "tag": "0000_talented_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741041921768,
+      "tag": "0001_condemned_puck",
+      "breakpoints": true
     }
   ]
 }
