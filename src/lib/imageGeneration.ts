@@ -5,6 +5,7 @@
  */
 
 import { env } from "~/env";
+import OpenAI from 'openai';
 
 /**
  * Generates an image based on a prompt.
@@ -13,6 +14,48 @@ import { env } from "~/env";
  * @param prompt The text prompt to generate an image from
  * @returns The path to the generated image
  */
+
+const openai = new OpenAI({
+  apiKey: env.OPENAI_API_KEY,
+});
+
+export async function comparePrompts(
+  originalPrompt: string,
+  userPrompt: string
+): Promise<number> {
+  try {
+    const [originalEmbedding, userEmbedding] = await Promise.all([
+      openai.embeddings.create({
+        input: originalPrompt,
+        model: "text-embedding-3-small"
+      }),
+      openai.embeddings.create({
+        input: userPrompt,
+        model: "text-embedding-3-small"
+      })
+    ]);
+
+    const similarity = calculateCosineSimilarity(
+      originalEmbedding.data[0]!.embedding, 
+      userEmbedding.data[0]!.embedding
+    );
+
+    return Math.round(similarity * 100);
+  } catch (error) {
+    console.error('Error comparing prompts:', error);
+    throw new Error("Failed to compare prompts");
+  }
+}
+
+function calculateCosineSimilarity(vec1: number[], vec2: number[]): number {
+  if (!vec1.length || !vec2.length) return -1;
+  const dotProduct = vec1.reduce((acc, val, i) => acc + val * vec2[i]!, 0);
+  const norm1 = Math.sqrt(vec1.reduce((acc, val) => acc + val * val, 0));
+  const norm2 = Math.sqrt(vec2.reduce((acc, val) => acc + val * val, 0));
+  return dotProduct / (norm1 * norm2);
+}
+
+
 export async function generateImage(prompt: string): Promise<string> {
   // This is a placeholder implementation
   // In a real application, this would call an API like DALL-E, Midjourney, or Stable Diffusion

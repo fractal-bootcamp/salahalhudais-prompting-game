@@ -134,54 +134,69 @@ export default function GameContainer() {
             {/* Prompt Input Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Your Prompt</CardTitle>
+                <CardTitle>Write Your Prompt</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {submissionResult && submissionResult.prompt && (
-                  <div className="space-y-4">
-                    <div className="relative h-64 w-64 overflow-hidden rounded-md">
-                      <Image
-                        src={submissionResult.prompt.generatedImagePath ?? "/placeholder.jpg"}
-                        alt="Generated image"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-lg font-bold">
-                        Similarity Score: {submissionResult.similarityScore.toFixed(2)}%
+              <CardContent>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Describe what you see in the image..."
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    disabled={isSubmitting}
+                    className="min-h-[100px]"
+                  />
+                  
+                  {submissionResult && (
+                    <div className="rounded-lg bg-muted p-4">
+                      <p className="font-semibold">
+                        Similarity Score: {submissionResult.similarityScore}%
                       </p>
+                      {submissionResult.similarityScore > 90 && (
+                        <p className="text-green-600">Excellent description!</p>
+                      )}
+                      {submissionResult.similarityScore > 70 && submissionResult.similarityScore <= 90 && (
+                        <p className="text-yellow-600">Good description, but can you be more specific?</p>
+                      )}
+                      {submissionResult.similarityScore <= 70 && (
+                        <p className="text-red-600">Try to be more detailed in your description.</p>
+                      )}
                     </div>
-                  </div>
-                )}
-
-                <Textarea
-                  placeholder="Enter your prompt here..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  disabled={isSubmitting || isLoadingGame || !gameData?.gameImage}
-                  className="min-h-24"
-                />
+                  )}
+                </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handleRefresh}
+                  disabled={isSubmitting || isLoadingGame}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  New Image
+                </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!prompt || isSubmitting || isLoadingGame || !gameData?.gameImage}
-                  className="w-full"
+                  disabled={!prompt.trim() || isSubmitting || !gameData?.gameImage}
                 >
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Submit Prompt
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Prompt'
+                  )}
                 </Button>
               </CardFooter>
             </Card>
           </div>
 
-          {/* Used Prompts */}
-          {gameData?.usedPrompts && gameData.usedPrompts.length > 0 && (
-            <div className="mt-6">
-              <UsedPrompts usedPrompts={gameData.usedPrompts} />
-            </div>
-          )}
+          {/* Used Prompts Section */}
+          <div className="mt-6">
+            <UsedPrompts
+              usedPrompts={gameData?.usedPrompts ?? []}
+              isLoading={isLoadingGame}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="leaderboard" className="mt-6">

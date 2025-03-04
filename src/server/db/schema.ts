@@ -225,3 +225,4 @@ export const gameLeaderboardRelations = relations(gameLeaderboard, ({ one }) => 
     relationName: "prompt_leaderboard",
   }),
 }));
+
