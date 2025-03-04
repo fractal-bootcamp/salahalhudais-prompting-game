@@ -1,5 +1,7 @@
 import { db } from "~/server/db";
 import { gameImages } from "~/server/db/schema";
+import fs from 'fs';
+import path from 'path';
 
 const initialGameImages = [
   {
@@ -15,8 +17,36 @@ const initialGameImages = [
   {
     imagePath: "/game-images/MaturePersonLookingAtGlobal.jpeg",
     originalPrompt: "A mature person contemplating a holographic global display, their experienced face reflecting wisdom and concern for the world. The lighting creates a dramatic atmosphere suggesting deep reflection on global matters.",
-    difficulty: 4,
+    difficulty: 5,
   },
+];
+
+// Try to load generated images if the file exists
+let generatedImages: Array<{
+  imagePath: string;
+  prompt: string;
+  difficulty: number;
+}> = [];
+
+const generatedImagesPath = path.join(process.cwd(), 'src', 'server', 'db', 'generated-images.json');
+if (fs.existsSync(generatedImagesPath)) {
+  try {
+    const fileContent = fs.readFileSync(generatedImagesPath, 'utf8');
+    generatedImages = JSON.parse(fileContent);
+    console.log(`Loaded ${generatedImages.length} generated images from JSON file`);
+  } catch (error) {
+    console.error('Error loading generated images:', error);
+  }
+}
+
+// Combine initial and generated images
+const allGameImages = [
+  ...initialGameImages,
+  ...generatedImages.map(img => ({
+    imagePath: img.imagePath,
+    originalPrompt: img.prompt,
+    difficulty: img.difficulty,
+  })),
 ];
 
 async function seed() {
@@ -28,7 +58,7 @@ async function seed() {
     console.log("🗑️  Cleared existing game images");
 
     // Insert game images
-    for (const image of initialGameImages) {
+    for (const image of allGameImages) {
       await db.insert(gameImages).values({
         imagePath: image.imagePath,
         originalPrompt: image.originalPrompt,
@@ -37,7 +67,7 @@ async function seed() {
       });
     }
 
-    console.log("✅ Seed completed successfully");
+    console.log(`✅ Seed completed successfully with ${allGameImages.length} images`);
   } catch (error) {
     console.error("❌ Error during seed:", error);
     throw error;

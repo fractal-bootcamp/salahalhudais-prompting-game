@@ -1,0 +1,52 @@
+[
+  {
+    "imagePath": "/game-images/dalle2_a_futuristic_citysca_1741120377003.png",
+    "prompt": "A futuristic cityscape with floating buildings and flying vehicles, bathed in neon lights against a sunset sky.",
+    "difficulty": 2
+  },
+  {
+    "imagePath": "/game-images/dalle2_an_ancient_temple_hi_1741120391235.png",
+    "prompt": "An ancient temple hidden in a lush jungle, with vines and moss covering stone statues and mysterious symbols carved into the walls.",
+    "difficulty": 3
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_serene_underwater__1741120402972.png",
+    "prompt": "A serene underwater scene with colorful coral reefs, schools of tropical fish, and rays of sunlight filtering through the water's surface.",
+    "difficulty": 2
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_cozy_cabin_in_a_sn_1741120415915.png",
+    "prompt": "A cozy cabin in a snowy forest at night, with warm light glowing from the windows and smoke rising from the chimney.",
+    "difficulty": 1
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_surreal_dreamscape_1741120428976.png",
+    "prompt": "A surreal dreamscape with floating islands, upside-down waterfalls, and impossible architecture defying gravity.",
+    "difficulty": 4
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_bustling_medieval__1741120441974.png",
+    "prompt": "A bustling medieval marketplace with merchants, performers, and people from various fantasy races trading exotic goods.",
+    "difficulty": 3
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_cosmic_scene_showi_1741120454999.png",
+    "prompt": "A cosmic scene showing the birth of a new star, with swirling nebulae of vibrant colors against the backdrop of deep space.",
+    "difficulty": 4
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_tranquil_japanese__1741120467384.png",
+    "prompt": "A tranquil Japanese garden with a koi pond, cherry blossoms, and a traditional wooden bridge over still water.",
+    "difficulty": 2
+  },
+  {
+    "imagePath": "/game-images/dalle2_an_abstract_represen_1741120478967.png",
+    "prompt": "An abstract representation of human emotions, with flowing shapes and colors blending together in a harmonious composition.",
+    "difficulty": 5
+  },
+  {
+    "imagePath": "/game-images/dalle2_a_steampunk_laborato_1741120490456.png",
+    "prompt": "A steampunk laboratory filled with brass contraptions, gears, and glowing tubes, where an inventor works on a mysterious device.",
+    "difficulty": 3
+  }
+]

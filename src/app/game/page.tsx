@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import GameContainer from "~/components/game/GameContainer";
+import GameSwitcher from "~/components/game/GameSwitcher";
 
 export const metadata: Metadata = {
   title: "Prompt Guessing Game | Generative Art",
@@ -14,6 +15,7 @@ export default function GamePage() {
         You&apos;ll be shown an AI-generated image. Your task is to create a text prompt that
         generates an image as similar as possible to the original. Each prompt must be unique!
       </p>
+      <GameSwitcher />
       <GameContainer />
     </div>
   );

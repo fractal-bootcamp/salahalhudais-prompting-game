@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/components/ui/use-toast";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Maximize2, X } from "lucide-react";
 import Image from "next/image";
 import GameLeaderboard from "./GameLeaderboard";
 import UsedPrompts from "./UsedPrompts";
@@ -17,6 +17,7 @@ import GameHistory from "./GameHistory";
 
 export default function GameContainer() {
   const [prompt, setPrompt] = useState("");
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("play");
 
@@ -70,6 +71,14 @@ export default function GameContainer() {
     void refetchGame();
   };
 
+  const handleImageClick = () => {
+    setImageModalOpen(true);
+  };
+  
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto py-6">
       <Tabs defaultValue="play" value={activeTab} onValueChange={setActiveTab}>
@@ -96,12 +105,21 @@ export default function GameContainer() {
                     <p className="text-destructive">Failed to load image</p>
                   </div>
                 ) : gameData?.gameImage ? (
-                  <div className="relative h-64 w-full overflow-hidden rounded-md">
+                  <div className="relative h-96 w-full overflow-hidden rounded-md">
+                    <div 
+                      className="absolute right-2 top-2 z-10 cursor-pointer rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                      onClick={handleImageClick}
+                    >
+                      <Maximize2 size={16} />
+                    </div>
                     <Image
                       src={gameData.gameImage.imagePath}
                       alt="Target image"
                       fill
-                      className="object-cover"
+                      className="object-contain cursor-pointer"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority
+                      onClick={handleImageClick}
                     />
                   </div>
                 ) : (
@@ -124,8 +142,23 @@ export default function GameContainer() {
                   New Image
                 </Button>
                 {gameData?.gameImage?.difficulty && (
-                  <div className="text-sm text-muted-foreground">
-                    Difficulty: {gameData.gameImage.difficulty}/10
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Difficulty:</span>
+                    <div className="flex items-center">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-2 w-4 rounded-full mx-0.5 ${
+                            i < (gameData?.gameImage?.difficulty ?? 0)
+                              ? 'bg-primary'
+                              : 'bg-muted'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="ml-1 text-sm font-medium">
+                      {gameData.gameImage.difficulty}/5
+                    </span>
                   </div>
                 )}
               </CardFooter>
@@ -207,6 +240,30 @@ export default function GameContainer() {
           <GameHistory />
         </TabsContent>
       </Tabs>
+
+      {/* Full-size image modal */}
+      {imageModalOpen && gameData?.gameImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="relative max-h-[90vh] max-w-[90vw]">
+            <button
+              onClick={closeImageModal}
+              className="absolute -right-4 -top-4 rounded-full bg-black p-2 text-white hover:bg-gray-800"
+            >
+              <X size={24} />
+            </button>
+            <div className="relative h-[80vh] w-[80vw]">
+              <Image
+                src={gameData.gameImage.imagePath}
+                alt="Target image full view"
+                fill
+                className="object-contain"
+                sizes="80vw"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
