@@ -12,7 +12,13 @@ const globalForDb = globalThis as unknown as {
   conn: postgres.Sql | undefined;
 };
 
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
+const connectionString = process.env.DATABASE_URL!;
+const client = postgres(connectionString, {
+  ssl: {
+    rejectUnauthorized: false  // Updated SSL configuration that works
+  }
+});
 
-export const db = drizzle(conn, { schema });
+if (env.NODE_ENV !== "production") globalForDb.conn = client;
+
+export const db = drizzle(client, { schema });
