@@ -2,6 +2,7 @@ import { db } from "~/server/db";
 import { gameImages } from "~/server/db/schema";
 import fs from 'fs';
 import path from 'path';
+import { sql } from "drizzle-orm";
 
 const initialGameImages = [
   {
@@ -63,7 +64,7 @@ async function seed() {
     console.log("🌱 Starting database seed...");
 
     // Clear existing game images
-    await db.delete(gameImages);
+    await db.delete(gameImages).where(sql`1=1`);
     console.log("🗑️  Cleared existing game images");
 
     // Insert game images

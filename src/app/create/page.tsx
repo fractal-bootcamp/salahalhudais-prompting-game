@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "~/components/ui/button"
 import { Slider } from "~/components/ui/slider"
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { ArtCanvas } from "~/components/art-canvas"
+import { ArtCanvas } from "~/components/art/art-canvas";
 import { ColorPicker } from "~/components/color-picker"
 import { ArrowLeft, Download, Save } from "lucide-react"
 import { ParticleBackground } from "~/components/particle-background"

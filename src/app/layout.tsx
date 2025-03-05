@@ -3,8 +3,8 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
-import { ThemeProvider } from "~/components/theme-provider"
-import { Navigation } from "./_components/Navigation"
+import { Navigation } from "~/components/shared/Navigation";
+import { ThemeProvider } from "~/components/shared/theme-provider"; // Correct path
 import { TRPCReactProvider } from "~/trpc/react"
 
 const inter = Inter({ subsets: ["latin"] })

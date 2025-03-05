@@ -18,10 +18,8 @@ interface ArtPiece {
   user: {
     id: string;
     username: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    createdAt?: Date;
-    updatedAt?: Date | null;
+    firstName?: string;
+    lastName?: string;
   };
   likeCount: number;
   isLiked: boolean;
@@ -56,7 +54,7 @@ export function GalleryGrid({ artworks }: GalleryGridProps) {
   }
 
   // Function to format username for display
-  const formatUsername = (user: { username: string; firstName?: string | null; lastName?: string | null }) => {
+  const formatUsername = (user: { username: string; firstName?: string; lastName?: string }) => {
     // If we have first name and last name, use them
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { gameImages, gamePrompts, gameLeaderboard, users } from "~/server/db/schema";
+import { gameImages, gamePrompts, users } from "~/server/db/schema";
 import { eq, and, desc, sql, inArray, count, asc, not, like } from "drizzle-orm";
 import { currentUser } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
@@ -169,33 +169,6 @@ export const gameRouter = createTRPCRouter({
 
       const promptId = newPrompt[0].id;
 
-      // Update leaderboard if this is the user's best score
-      const existingLeaderboardEntry = await ctx.db.query.gameLeaderboard.findFirst({
-        where: and(
-          eq(gameLeaderboard.userId, user.id),
-          eq(gameLeaderboard.gameImageId, input.gameImageId)
-        ),
-      });
-
-      if (!existingLeaderboardEntry || existingLeaderboardEntry.bestScore < similarityScore) {
-        if (existingLeaderboardEntry) {
-          await ctx.db
-            .update(gameLeaderboard)
-            .set({
-              bestScore: similarityScore,
-              promptId: promptId,
-              updatedAt: new Date(),
-            })
-            .where(eq(gameLeaderboard.id, existingLeaderboardEntry.id));
-        } else {
-          await ctx.db.insert(gameLeaderboard).values({
-            userId: user.id,
-            gameImageId: input.gameImageId,
-            bestScore: similarityScore,
-            promptId: promptId,
-          });
-        }
-      }
 
       return {
         prompt: newPrompt[0],
@@ -203,44 +176,6 @@ export const gameRouter = createTRPCRouter({
         similarityScore,
       };
     }),
-
-  // Get leaderboard for a specific game image
-  getImageLeaderboard: publicProcedure
-    .input(z.object({ gameImageId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const leaderboard = await ctx.db.query.gameLeaderboard.findMany({
-        where: eq(gameLeaderboard.gameImageId, input.gameImageId),
-        orderBy: [desc(gameLeaderboard.bestScore)],
-        with: {
-          user: true,
-          prompt: true,
-        },
-        limit: 10,
-      });
-
-      return leaderboard;
-    }),
-
-  // Get global leaderboard (best scores across all images)
-  getGlobalLeaderboard: publicProcedure.query(async ({ ctx }) => {
-    const leaderboard = await ctx.db
-      .select({
-        userId: gameLeaderboard.userId,
-        username: users.username,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        totalScore: sql<number>`SUM(${gameLeaderboard.bestScore})`,
-        gamesPlayed: sql<number>`COUNT(DISTINCT ${gameLeaderboard.gameImageId})`,
-        avgScore: sql<number>`AVG(${gameLeaderboard.bestScore})`,
-      })
-      .from(gameLeaderboard)
-      .innerJoin(users, eq(gameLeaderboard.userId, users.id))
-      .groupBy(gameLeaderboard.userId, users.username, users.firstName, users.lastName)
-      .orderBy(desc(sql`SUM(${gameLeaderboard.bestScore})`))
-      .limit(10);
-
-    return leaderboard;
-  }),
 
   // Get user's game history
   getUserHistory: protectedProcedure.query(async ({ ctx }) => {
@@ -308,6 +243,7 @@ export const gameRouter = createTRPCRouter({
           imagePath: input.imagePath,
           originalPrompt: input.originalPrompt,
           difficulty: input.difficulty,
+          targetWords: [],
         })
         .returning();
 

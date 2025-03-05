@@ -38,8 +38,7 @@ class Particle {
 
     // Ensure we have a valid color by providing a default
     const index = Math.floor(Math.random() * colorOptions.length);
-    // Add a fallback color in case the index is out of bounds
-    this.color = colorOptions[index] || `rgba(255, 255, 255, ${this.opacity})`;
+    this.color = colorOptions[index] || `rgba(255, 105, 180, ${this.opacity})`;
 
     this.rising = Math.random() > 0.5
     this.wobbleOffset = Math.random() * Math.PI * 2
