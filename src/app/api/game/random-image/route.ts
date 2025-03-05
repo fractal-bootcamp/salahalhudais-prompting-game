@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { db } from "~/server/db";
 import { gameImages } from "~/server/db/schema";
-import { eq, and, gte, lt } from "drizzle-orm";
+import { and, lt, gte, sql, SQL } from "drizzle-orm"; // Add this import
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const difficultyFilter = searchParams.get('difficulty');
     
     // Set up filter conditions based on difficulty
-    let conditions = eq(gameImages.active, true);
+    let conditions: SQL<unknown> = sql`1=1`;
     
     if (difficultyFilter) {
       switch (difficultyFilter) {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
           conditions = and(
             conditions,
             lt(gameImages.difficulty, 4)
-          );
+          ) || conditions;
           break;
         case 'medium':
           // Medium: difficulty 4-7
@@ -27,14 +27,14 @@ export async function GET(req: NextRequest) {
             conditions,
             gte(gameImages.difficulty, 4),
             lt(gameImages.difficulty, 8)
-          );
+          ) || conditions;
           break;
         case 'hard':
           // Hard: difficulty 8-10
           conditions = and(
             conditions,
             gte(gameImages.difficulty, 8)
-          );
+          ) || conditions;
           break;
       }
     }
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       id: randomImage.id,
       imagePath: randomImage.imagePath,
-      difficulty: randomImage.difficulty,
+      difficulty: Number(randomImage.difficulty),
       targetWords: targetWords,
     });
   } catch (error) {

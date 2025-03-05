@@ -91,7 +91,7 @@ Ensure the filename is lowercase with underscores.`
 }
 
 // Function to create a seed script from the generated pairs
-function createSeedScript(pairs) {
+function createSeedScript(pairs: { adjective: string; noun: string }[]) {
   if (!pairs.length) return;
   
   const seedScriptPath = path.join(__dirname, 'seed-adj-noun-images.ts');

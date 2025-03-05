@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { 
           similarity: 0, 
-          rank: "Very Low", 
+          rank: 0, 
           wordSimilarities: [] 
         }
       );
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { 
           similarity: 0, 
-          rank: "Very Low", 
+          rank: 0, 
           wordSimilarities: [] 
         }
       );

@@ -26,6 +26,19 @@ type Guess = {
   wordSimilarities?: { word: string; similarity: number; targetWord: string }[]
 }
 
+// Add proper types for your API responses
+interface GameImageResponse {
+  imagePath: string;
+  targetWords: string[];
+  difficulty: number;
+}
+
+interface SimilarityResponse {
+  similarity: number;
+  rank: number;
+  wordSimilarities: any[]; // Replace with proper type if known
+}
+
 export default function PicktleGame() {
   const [guesses, setGuesses] = useState<Guess[]>([])
   const [inputValue, setInputValue] = useState("")
@@ -65,11 +78,11 @@ export default function PicktleGame() {
           throw new Error('Failed to fetch game data')
         }
         
-        const data = await response.json()
+        const data = await response.json() as GameImageResponse
         setGameData({
           image: data.imagePath,
           targetWords: data.targetWords || [],
-          difficulty: data.difficulty || 1,
+          difficulty: Number(data.difficulty) || 1,
         })
       } catch (error) {
         console.error('Error fetching game data:', error)
@@ -121,7 +134,7 @@ export default function PicktleGame() {
         throw new Error('Failed to calculate similarity');
       }
 
-      const data = await response.json();
+      const data = await response.json() as SimilarityResponse;
       return {
         similarity: data.similarity,
         rank: data.rank,
@@ -252,11 +265,11 @@ export default function PicktleGame() {
           throw new Error('Failed to fetch new game data');
         }
         
-        const data = await response.json();
+        const data = await response.json() as GameImageResponse;
         setGameData({
           image: data.imagePath,
           targetWords: data.targetWords || [],
-          difficulty: data.difficulty || 1,
+          difficulty: Number(data.difficulty) || 1,
         });
       } catch (error) {
         console.error('Error fetching new game data:', error);
@@ -368,11 +381,11 @@ export default function PicktleGame() {
                             throw new Error('Failed to fetch new game data');
                           }
                           
-                          const data = await response.json();
+                          const data = await response.json() as GameImageResponse;
                           setGameData({
                             image: data.imagePath,
                             targetWords: data.targetWords || [],
-                            difficulty: data.difficulty || 1,
+                            difficulty: Number(data.difficulty) || 1,
                           });
                           
                           // Reset image error state
