@@ -12,9 +12,9 @@ export function AnimatedBackground() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Define a safe reference to canvas and ctx that TypeScript knows are not null
-    const safeCanvas = canvas
-    const safeCtx = ctx
+    // Create non-null variables that TypeScript can understand
+    const safeCanvas = canvas;
+    const safeCtx = ctx;
 
     // Set canvas dimensions
     const resizeCanvas = () => {
@@ -53,8 +53,9 @@ export function AnimatedBackground() {
           "rgba(50, 205, 50, 0.7)", // Lime green
           "rgba(255, 165, 0, 0.7)", // Orange
         ]
-        const colorIndex = Math.floor(Math.random() * colors.length)
-        this.color = colors[colorIndex] ?? "rgba(255, 105, 180, 0.7)"
+        // Fix for line 52: Ensure we have a valid color
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        this.color = colors[colorIndex] || "rgba(255, 105, 180, 0.7)";
       }
 
       update() {
@@ -93,11 +94,12 @@ export function AnimatedBackground() {
       safeCtx.fillStyle = "rgba(0, 0, 0, 0.02)"
       safeCtx.fillRect(0, 0, safeCanvas.width, safeCanvas.height)
 
+      // Fix for lines 92-93: Add a check to ensure the particle exists
       for (let i = 0; i < particlesArray.length; i++) {
-        const particle = particlesArray[i]
-        if (particle) {
-          particle.update()
-          particle.draw()
+        const particle = particlesArray[i];
+        if (particle) {  // Check if particle exists
+          particle.update();
+          particle.draw();
         }
       }
 

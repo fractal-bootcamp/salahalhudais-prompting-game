@@ -1,0 +1,102 @@
+[
+  {
+    "title": "Polka-Dotted Giraffe",
+    "filename": "polka_dotted_giraffe.png",
+    "prompt": "An image of a charming giraffe covered in colorful polka dots instead of its usual spots",
+    "targetWords": [
+      "Polka-Dotted",
+      "Giraffe"
+    ],
+    "difficulty": 1
+  },
+  {
+    "title": "Glowing Pineapple",
+    "filename": "glowing_pineapple.png",
+    "prompt": "A pineapple that radiates a soft, warm light",
+    "targetWords": [
+      "Glowing",
+      "Pineapple"
+    ],
+    "difficulty": 2
+  },
+  {
+    "title": "Rainbow Elephant",
+    "filename": "rainbow_elephant.png",
+    "prompt": "A majestic elephant with iridescent, rainbow-colored skin",
+    "targetWords": [
+      "Rainbow",
+      "Elephant"
+    ],
+    "difficulty": 3
+  },
+  {
+    "title": "Steampunk Octopus",
+    "filename": "steampunk_octopus.png",
+    "prompt": "An octopus fashioned from brass and gears, a true representation of steampunk aesthetic",
+    "targetWords": [
+      "Steampunk",
+      "Octopus"
+    ],
+    "difficulty": 4
+  },
+  {
+    "title": "Neon Jungle",
+    "filename": "neon_jungle.png",
+    "prompt": "A high-contrast image of a dense jungle where every plant glows with bright neon colors",
+    "targetWords": [
+      "Neon",
+      "Jungle"
+    ],
+    "difficulty": 5
+  },
+  {
+    "title": "Melting Skyline",
+    "filename": "melting_skyline.png",
+    "prompt": "A surreal image of a city skyline seemingly melting into the horizon",
+    "targetWords": [
+      "Melting",
+      "Skyline"
+    ],
+    "difficulty": 6
+  },
+  {
+    "title": "Astral Waterfall",
+    "filename": "astral_waterfall.png",
+    "prompt": "A waterfall cascading from a starry night sky, each droplet a shimmering star itself",
+    "targetWords": [
+      "Astral",
+      "Waterfall"
+    ],
+    "difficulty": 7
+  },
+  {
+    "title": "Tesseract Pyramid",
+    "filename": "tesseract_pyramid.png",
+    "prompt": "An image of a pyramid within a pyramid, both interacting across four dimensions",
+    "targetWords": [
+      "Tesseract",
+      "Pyramid"
+    ],
+    "difficulty": 8
+  },
+  {
+    "title": "Quantum Forest",
+    "filename": "quantum_forest.png",
+    "prompt": "A view into a forest where each tree simultaneously exists in multiple states and locations",
+    "targetWords": [
+      "Quantum",
+      "Forest"
+    ],
+    "difficulty": 9
+  },
+  {
+    "title": "Infinite Kaleidoscope",
+    "filename": "infinite_kaleidoscope.png",
+    "prompt": "The perspective from within a kaleidoscope that extends into infinity, showing a dizzying array of colors and patterns",
+    "targetWords": [
+      "Infinite",
+      "Kaleidoscope"
+    ],
+    "difficulty": 10
+  }
+]

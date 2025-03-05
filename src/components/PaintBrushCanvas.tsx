@@ -29,24 +29,24 @@ const artworks = [
 export function PaintbrushTitle() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
-  
+
   // Start with default values for server-side rendering
   const [isRevealing, setIsRevealing] = useState(true)
   const [revealPercentage, setRevealPercentage] = useState(0)
   const [isFullyRevealed, setIsFullyRevealed] = useState(false)
   const [isClient, setIsClient] = useState(false)
-  
+
   // Set isClient to true once component mounts (client-side only)
   useEffect(() => {
     setIsClient(true)
-    
+
     // Check sessionStorage with expiration
     try {
       const storedData = sessionStorage.getItem('artTitleRevealed')
       if (storedData) {
         const data = JSON.parse(storedData)
         const now = new Date().getTime()
-        
+
         // Check if the stored data is still valid (not expired)
         if (data.expiry > now && data.revealed) {
           setIsRevealing(false)
@@ -67,7 +67,7 @@ export function PaintbrushTitle() {
   useEffect(() => {
     // Skip if not client-side yet
     if (!isClient) return
-    
+
     const canvas = canvasRef.current
     const titleElement = titleRef.current
     if (!canvas || !titleElement) return
@@ -90,7 +90,7 @@ export function PaintbrushTitle() {
       // Otherwise fill canvas with black
       ctx.fillStyle = "#000000"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
+
       // Add some texture/noise to the black overlay
       for (let i = 0; i < canvas.width * canvas.height * 0.05; i++) {
         const x = Math.random() * canvas.width
@@ -119,30 +119,34 @@ export function PaintbrushTitle() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const data = imageData?.data
         let transparentPixels = 0
-        
+
         // Count transparent pixels (alpha < 50)
         if (data) {
           for (let i = 3; i < data.length; i += 4) {
-            if (i < data.length && data[i] < 50) transparentPixels++
+            // Use a type assertion to tell TypeScript that data[i] is a number
+            const alphaValue = data[i] as number;
+            if (alphaValue < 50) {
+              transparentPixels++
+            }
           }
-          
+
           // Calculate percentage revealed
           const totalPixels = canvas.width * canvas.height
           const percentRevealed = (transparentPixels / totalPixels) * 100
-          
+
           // Update state if significantly revealed (over 60%)
           if (percentRevealed > 60 && !isFullyRevealed) {
             setIsFullyRevealed(true)
-            
+
             // Save to sessionStorage with 10-minute expiration
             const now = new Date().getTime()
             const expiryTime = now + (10 * 60 * 1000) // 10 minutes in milliseconds
-            
+
             const dataToStore = {
               revealed: true,
               expiry: expiryTime
             }
-            
+
             sessionStorage.setItem('artTitleRevealed', JSON.stringify(dataToStore))
           }
         }
@@ -154,7 +158,7 @@ export function PaintbrushTitle() {
     // Automatically reveal the title
     if (isRevealing) {
       let animationFrame: number
-      
+
       const autoReveal = () => {
         if (revealPercentage >= 100) {
           setIsRevealing(false)
@@ -167,21 +171,21 @@ export function PaintbrushTitle() {
         const centerY = canvas.height / 2
         const radius = Math.min(canvas.width, canvas.height) * 0.4
         const angle = (revealPercentage / 100) * Math.PI * 2
-        
+
         // Calculate position along a spiral
         const x = centerX + Math.cos(angle * 3) * radius * (revealPercentage / 100)
         const y = centerY + Math.sin(angle * 2) * radius * 0.5
-        
+
         // Draw a brush stroke
         ctx.globalCompositeOperation = "destination-out"
         ctx.beginPath()
         ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2)
         ctx.fill()
-        
+
         // Add some random smaller strokes for texture
         for (let i = 0; i < 3; i++) {
-          const offsetX = x + (Math.random() * brushSize - brushSize/2)
-          const offsetY = y + (Math.random() * brushSize - brushSize/2)
+          const offsetX = x + (Math.random() * brushSize - brushSize / 2)
+          const offsetY = y + (Math.random() * brushSize - brushSize / 2)
           ctx.beginPath()
           ctx.arc(offsetX, offsetY, brushSize / 4, 0, Math.PI * 2)
           ctx.fill()
@@ -192,12 +196,12 @@ export function PaintbrushTitle() {
           const newValue = Math.min(prev + 0.8, 100) // Faster increment
           return newValue
         })
-        
+
         animationFrame = requestAnimationFrame(autoReveal)
       }
 
       animationFrame = requestAnimationFrame(autoReveal)
-      
+
       return () => {
         cancelAnimationFrame(animationFrame)
       }
@@ -214,20 +218,20 @@ export function PaintbrushTitle() {
       ctx.moveTo(x1, y1)
       ctx.lineTo(x2, y2)
       ctx.stroke()
-      
+
       // Add some texture with smaller strokes
       for (let i = 0; i < 2; i++) {
-        const offsetX1 = x1 + (Math.random() * brushSize/2 - brushSize/4)
-        const offsetY1 = y1 + (Math.random() * brushSize/2 - brushSize/4)
-        const offsetX2 = x2 + (Math.random() * brushSize/2 - brushSize/4)
-        const offsetY2 = y2 + (Math.random() * brushSize/2 - brushSize/4)
-        
+        const offsetX1 = x1 + (Math.random() * brushSize / 2 - brushSize / 4)
+        const offsetY1 = y1 + (Math.random() * brushSize / 2 - brushSize / 4)
+        const offsetX2 = x2 + (Math.random() * brushSize / 2 - brushSize / 4)
+        const offsetY2 = y2 + (Math.random() * brushSize / 2 - brushSize / 4)
+
         ctx.beginPath()
         ctx.moveTo(offsetX1, offsetY1)
         ctx.lineTo(offsetX2, offsetY2)
         ctx.stroke()
       }
-      
+
       // Check if title is fully revealed after manual interaction
       checkRevealStatus()
     }
@@ -238,7 +242,7 @@ export function PaintbrushTitle() {
       const { x, y } = getPointerPosition(e)
       lastX = x
       lastY = y
-      
+
       // Stop auto-revealing when user interacts
       setIsRevealing(false)
     }
@@ -273,7 +277,7 @@ export function PaintbrushTitle() {
           y: e.clientY - rect.top,
         }
       }
-      
+
       // Fallback if neither condition is met
       return { x: 0, y: 0 }
     }
@@ -304,33 +308,33 @@ export function PaintbrushTitle() {
     if (!isRevealing && !isFullyRevealed) {
       const canvas = canvasRef.current
       if (!canvas) return
-      
+
       const ctx = canvas.getContext('2d')
       if (!ctx) return
-      
+
       // Draw a subtle hint animation
       const hintAnimation = () => {
         const centerX = canvas.width / 2
         const centerY = canvas.height / 2
-        
+
         ctx.globalCompositeOperation = "destination-out"
         ctx.beginPath()
         ctx.arc(centerX, centerY, 20, 0, Math.PI * 2)
         ctx.fill()
-        
+
         // Add some dust particles
         for (let i = 0; i < 10; i++) {
           const angle = Math.random() * Math.PI * 2
           const distance = Math.random() * 40 + 20
           const x = centerX + Math.cos(angle) * distance
           const y = centerY + Math.sin(angle) * distance
-          
+
           ctx.beginPath()
           ctx.arc(x, y, Math.random() * 5 + 2, 0, Math.PI * 2)
           ctx.fill()
         }
       }
-      
+
       // Show hint after a short delay
       const timeout = setTimeout(hintAnimation, 2000)
       return () => clearTimeout(timeout)
@@ -366,7 +370,7 @@ export function PaintbrushTitle() {
           <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-amber-500 py-4 px-6">
             Art Prompt Collection
           </h1>
-          <motion.p 
+          <motion.p
             className="text-lg md:text-xl text-gray-600 mt-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: isFullyRevealed ? 1 : 0, y: isFullyRevealed ? 0 : 10 }}
@@ -376,9 +380,9 @@ export function PaintbrushTitle() {
           </motion.p>
         </div>
         <canvas ref={canvasRef} className="absolute inset-0 cursor-pointer" />
-        
+
         {!isRevealing && !isFullyRevealed && (
-          <motion.div 
+          <motion.div
             className="text-center mt-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -387,16 +391,16 @@ export function PaintbrushTitle() {
             <p className="text-gray-500 text-sm">Move your cursor or finger across the title to reveal it</p>
           </motion.div>
         )}
-        
+
         {isFullyRevealed && (
-          <motion.div 
+          <motion.div
             className="text-center mt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
             <Link href="#artworks">
-              <Button 
+              <Button
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-md text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 onClick={() => {
                   document.getElementById('artworks')?.scrollIntoView({ behavior: 'smooth' })
@@ -407,11 +411,11 @@ export function PaintbrushTitle() {
             </Link>
           </motion.div>
         )}
-        
+
         {/* Uncomment this for testing if you need to reset the reveal state */}
         <div className="absolute bottom-0 right-0 p-2">
-          <button 
-            onClick={resetReveal} 
+          <button
+            onClick={resetReveal}
             className="text-xs text-gray-400 hover:text-gray-600"
           >
             Reset
@@ -432,7 +436,7 @@ export default function HomePage() {
       <main className="relative z-10 flex flex-col">
         {/* Title section at the top */}
         <PaintbrushTitle />
-        
+
         {/* Create Your Art button */}
         <div className="flex justify-center my-8">
           <Link href="/create">
@@ -441,7 +445,7 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
-        
+
         {/* Artwork section */}
         <div id="artworks" className="container mx-auto px-4 py-8 md:py-12">
           <motion.h2
@@ -452,7 +456,7 @@ export default function HomePage() {
           >
             Featured Artworks
           </motion.h2>
-          
+
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 40 }}
@@ -475,10 +479,10 @@ export default function HomePage() {
                 >
                   <Image
                     src={
-                      typeof artwork.config === 'object' && 
-                      artwork.config !== null && 
-                      'imageUrl' in artwork.config 
-                        ? (artwork.config as any).imageUrl 
+                      typeof artwork.config === 'object' &&
+                        artwork.config !== null &&
+                        'imageUrl' in artwork.config
+                        ? (artwork.config as any).imageUrl
                         : "/placeholder.svg"
                     }
                     alt={artwork.title || "Artwork"}

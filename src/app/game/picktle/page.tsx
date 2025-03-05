@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import PicktleGame from "~/components/game/PicktleGame";
+import PicktleGame from "./components/PicktleGame";
 
 export const metadata: Metadata = {
   title: "Picktle | Generative Art",

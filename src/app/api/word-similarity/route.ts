@@ -4,20 +4,48 @@ import { calculateWordSimilarity, calculateRank } from "~/lib/wordEmbeddings";
 export async function POST(req: NextRequest) {
   try {
     // Parse request body
-    const body = await req.json();
-    const { targetWords, guessWords } = body;
+    const body = await req.json() as { guess: string, targetWords: string[] };
+    const userGuess = body.guess?.trim() || "";
+    const targetWords = body.targetWords || [];
 
     // Validate input
-    if (!Array.isArray(targetWords) || !Array.isArray(guessWords)) {
+    if (!Array.isArray(targetWords)) {
       return NextResponse.json(
-        { error: "targetWords and guessWords must be arrays" },
+        { error: "targetWords must be an array" },
         { status: 400 }
       );
     }
 
+    // Validate that userGuess is not empty
+    if (!userGuess) {
+      return NextResponse.json(
+        { 
+          similarity: 0, 
+          rank: "Very Low", 
+          wordSimilarities: [] 
+        }
+      );
+    }
+
+    // Filter out any empty target words
+    const validTargetWords = targetWords.filter(word => word && word.trim() !== "");
+    
+    // If no valid target words, return zero similarity
+    if (validTargetWords.length === 0) {
+      return NextResponse.json(
+        { 
+          similarity: 0, 
+          rank: "Very Low", 
+          wordSimilarities: [] 
+        }
+      );
+    }
+
+    // Split the guess into words
+    const guessWords = userGuess.toLowerCase().split(/\s+/);
+
     // Calculate similarity (now async)
-    // This will run on the server side, so OpenAI API can be used if available
-    const { similarity, rank, wordSimilarities } = await calculateWordSimilarity(targetWords, guessWords);
+    const { similarity, rank, wordSimilarities } = await calculateWordSimilarity(validTargetWords, guessWords);
 
     // Return result with per-word similarities
     return NextResponse.json({

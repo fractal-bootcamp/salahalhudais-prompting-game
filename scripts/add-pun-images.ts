@@ -1,5 +1,5 @@
-import { db } from '../src/db';
-import { gameImages } from '../src/db/schema';
+import { db } from '~/server/db';
+import { gameImages } from '~/server/db/schema';
 import { sql } from 'drizzle-orm';
 
 // List of pun prompts with their filenames and target words

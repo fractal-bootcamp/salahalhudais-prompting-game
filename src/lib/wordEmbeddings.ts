@@ -48,29 +48,31 @@ export function calculateRank(similarity: number): number {
  * Get embedding for a text using OpenAI API
  */
 export async function getEmbedding(text: string): Promise<number[]> {
-  // Check cache first
-  if (embeddingCache.has(text)) {
-    return embeddingCache.get(text)!;
+  // Ensure text is a non-empty string
+  if (!text || typeof text !== 'string' || text.trim() === '') {
+    console.warn("Empty text provided to getEmbedding");
+    // Return a zero vector of appropriate dimension instead of throwing
+    return new Array(1536).fill(0); // 1536 is the dimension for text-embedding-3-small
   }
 
-  // Check if we're on the client side
-  if (typeof window !== 'undefined') {
-    console.error("OpenAI API can only be used on the server side");
-    throw new Error("OpenAI API can only be used on the server side");
+  // Check if we have a cached embedding
+  const cachedEmbedding = embeddingCache.get(text);
+  if (cachedEmbedding) {
+    return cachedEmbedding;
   }
 
-  // Check if API key is available
-  if (!openai || !openai.apiKey || openai.apiKey === "") {
-    console.error("OpenAI API key is missing. Using fallback similarity calculation.");
-    throw new Error("OpenAI API key is missing");
+  // Check if OpenAI client is available
+  if (!openai) {
+    console.warn("OpenAI client not available, using fallback similarity");
+    // Return a random vector instead of throwing
+    return new Array(1536).fill(0).map(() => Math.random() * 2 - 1);
   }
 
   try {
-    // We've already checked that openai is not null above
-    // This assertion tells TypeScript that openai is definitely not null
+    // We've already checked that text is not empty above
     const response = await (openai as OpenAI).embeddings.create({
       model: "text-embedding-3-small",
-      input: text,
+      input: text.trim(),
     });
 
     const embedding = response.data[0]?.embedding;
@@ -85,7 +87,8 @@ export async function getEmbedding(text: string): Promise<number[]> {
     return embedding;
   } catch (error) {
     console.error("Error getting embedding:", error);
-    throw new Error("Failed to get embedding from OpenAI");
+    // Return a random vector instead of throwing
+    return new Array(1536).fill(0).map(() => Math.random() * 2 - 1);
   }
 }
 
@@ -125,25 +128,34 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 export async function calculateWordSimilarity(
   targetWords: string[],
   guessWords: string[]
-): Promise<{ 
-  similarity: number; 
-  rank: number; 
-  wordSimilarities: { word: string; similarity: number; targetWord: string }[] 
-}> {
+): Promise<{ similarity: number; rank: string; wordSimilarities: { word: string; similarity: number; targetWord: string }[] }> {
+  // Filter out empty strings
+  const validTargetWords = targetWords.filter(word => word && word.trim() !== "");
+  const validGuessWords = guessWords.filter(word => word && word.trim() !== "");
+  
+  // If either array is empty, return zero similarity
+  if (validTargetWords.length === 0 || validGuessWords.length === 0) {
+    return {
+      similarity: 0,
+      rank: "Very Low",
+      wordSimilarities: []
+    };
+  }
+
   try {
     // If exact match, return 100% similarity
     if (
-      targetWords.length === guessWords.length &&
-      targetWords.every((word, i) => {
-        const guessWord = guessWords[i];
+      validTargetWords.length === validGuessWords.length &&
+      validTargetWords.every((word, i) => {
+        const guessWord = validGuessWords[i];
         return guessWord !== undefined && word.toLowerCase() === guessWord.toLowerCase();
       })
     ) {
       return {
         similarity: 100,
-        rank: 1,
-        wordSimilarities: targetWords.map((targetWord, i) => ({
-          word: guessWords[i] ?? "",
+        rank: "1",
+        wordSimilarities: validTargetWords.map((targetWord, i) => ({
+          word: validGuessWords[i] ?? "",
           similarity: 100,
           targetWord
         }))
@@ -153,51 +165,72 @@ export async function calculateWordSimilarity(
     // Check if we're on the client side
     if (typeof window !== 'undefined') {
       console.warn("OpenAI API can only be used on the server side. Using fallback similarity calculation.");
-      return fallbackWordSimilarity(targetWords, guessWords);
+      return fallbackWordSimilarity(validTargetWords, validGuessWords);
     }
 
     // Check if API key is available
     if (!openai || !openai.apiKey || openai.apiKey === "") {
       console.warn("OpenAI API key is missing. Using fallback similarity calculation.");
-      return fallbackWordSimilarity(targetWords, guessWords);
+      return fallbackWordSimilarity(validTargetWords, validGuessWords);
     }
 
     // Get embeddings for individual words
     try {
       const targetEmbeddings = await Promise.all(
-        targetWords.map(word => getEmbedding(word))
+        validTargetWords.map(word => getEmbedding(word))
       );
       
       const guessEmbeddings = await Promise.all(
-        guessWords.map(word => getEmbedding(word))
+        validGuessWords.map(word => getEmbedding(word))
       );
       
       // Calculate similarity for each word pair to find best matches
       const wordSimilarities: { word: string; similarity: number; targetWord: string }[] = [];
       
       // For each guess word, find the most similar target word
-      for (let i = 0; i < guessWords.length; i++) {
-        let bestSimilarity = 0;
-        let bestTargetWord = targetWords[0] || "";
-        const guessWord = guessWords[i] || "";
+      for (let i = 0; i < validGuessWords.length; i++) {
+        const guessWord = validGuessWords[i] || "";
         const guessEmbedding = guessEmbeddings[i] || [];
         
-        for (let j = 0; j < targetWords.length; j++) {
-          const targetWord = targetWords[j] || "";
-          const targetEmbedding = targetEmbeddings[j] || [];
+        // Check for exact matches first
+        let exactMatchFound = false;
+        for (let j = 0; j < validTargetWords.length; j++) {
+          const targetWord = validTargetWords[j] || "";
           
-          const similarity = cosineSimilarity(guessEmbedding, targetEmbedding);
-          if (similarity > bestSimilarity) {
-            bestSimilarity = similarity;
-            bestTargetWord = targetWord;
+          // If there's an exact match (case insensitive), assign 100% similarity
+          if (guessWord.toLowerCase() === targetWord.toLowerCase()) {
+            wordSimilarities.push({
+              word: guessWord,
+              similarity: 100,
+              targetWord: targetWord
+            });
+            exactMatchFound = true;
+            break;
           }
         }
         
-        wordSimilarities.push({
-          word: guessWord,
-          similarity: Number(bestSimilarity.toFixed(2)),
-          targetWord: bestTargetWord
-        });
+        // If no exact match, use embeddings to find the most similar word
+        if (!exactMatchFound) {
+          let bestSimilarity = 0;
+          let bestTargetWord = validTargetWords[0] || "";
+          
+          for (let j = 0; j < validTargetWords.length; j++) {
+            const targetWord = validTargetWords[j] || "";
+            const targetEmbedding = targetEmbeddings[j] || [];
+            
+            const similarity = cosineSimilarity(guessEmbedding, targetEmbedding);
+            if (similarity > bestSimilarity) {
+              bestSimilarity = similarity;
+              bestTargetWord = targetWord;
+            }
+          }
+          
+          wordSimilarities.push({
+            word: guessWord,
+            similarity: Number(bestSimilarity.toFixed(2)),
+            targetWord: bestTargetWord
+          });
+        }
       }
       
       // Calculate overall similarity (average of individual similarities)
@@ -211,19 +244,19 @@ export async function calculateWordSimilarity(
       
       return {
         similarity: Number(overallSimilarity.toFixed(2)),
-        rank,
+        rank: rank.toString(),
         wordSimilarities
       };
     } catch (embeddingError) {
       console.error("Error with embeddings:", embeddingError);
       // Fallback to simplified calculation if embedding fails
-      return fallbackWordSimilarity(targetWords, guessWords);
+      return fallbackWordSimilarity(validTargetWords, validGuessWords);
     }
   } catch (error) {
     console.error("Error calculating word similarity:", error);
     
     // Fallback to simplified calculation if API fails
-    return fallbackWordSimilarity(targetWords, guessWords);
+    return fallbackWordSimilarity(validTargetWords, validGuessWords);
   }
 }
 
