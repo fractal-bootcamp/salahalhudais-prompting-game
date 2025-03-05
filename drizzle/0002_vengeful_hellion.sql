@@ -1,1 +1,0 @@
-ALTER TABLE "generative-art_game_image" ADD COLUMN "target_words" json NOT NULL;

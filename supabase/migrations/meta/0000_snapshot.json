@@ -1,6 +1,6 @@
 {
-  "id": "47fe00b3-5715-40ab-8112-2a392699508b",
-  "prevId": "61443f14-8e49-4aa3-86df-dd35d0c077b5",
+  "id": "569dec42-6a42-43a1-88b6-c56b0454a397",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -125,11 +125,17 @@
           "primaryKey": false,
           "notNull": true
         },
+        "target_words": {
+          "name": "target_words",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
         "difficulty": {
           "name": "difficulty",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 1
         },
         "active": {
