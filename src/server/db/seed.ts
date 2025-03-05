@@ -8,16 +8,22 @@ const initialGameImages = [
     imagePath: "/game-images/PersonOverseeingEarth.webp",
     originalPrompt: "A person smiling from the far away distance of the galaxies at a globe, watching children play in a park within the globe. The person has warm eyes and a touching smile, surrounded by golden, majestic colors amidst dark space. Their connection to Earth appears deep and paternal.",
     difficulty: 2,
+    targetWords: ["watchful", "guardian"],
+    active: true
   },
   {
     imagePath: "/game-images/kidSmilingAtGlobe.jpeg",
     originalPrompt: "A young child with an innocent expression gazing at a glowing globe, their face lit up with wonder and curiosity. The scene captures childhood amazement at discovering the world.",
     difficulty: 3,
+    targetWords: ["innocent", "curious"],
+    active: true
   },
   {
     imagePath: "/game-images/MaturePersonLookingAtGlobal.jpeg",
     originalPrompt: "A mature person contemplating a holographic global display, their experienced face reflecting wisdom and concern for the world. The lighting creates a dramatic atmosphere suggesting deep reflection on global matters.",
     difficulty: 5,
+    targetWords: ["wise", "concerned"],
+    active: true
   },
 ];
 
@@ -26,6 +32,7 @@ let generatedImages: Array<{
   imagePath: string;
   prompt: string;
   difficulty: number;
+  targetWords?: string[];
 }> = [];
 
 const generatedImagesPath = path.join(process.cwd(), 'src', 'server', 'db', 'generated-images.json');
@@ -46,6 +53,8 @@ const allGameImages = [
     imagePath: img.imagePath,
     originalPrompt: img.prompt,
     difficulty: img.difficulty,
+    targetWords: img.targetWords || ["placeholder", "words"],
+    active: true
   })),
 ];
 
@@ -63,7 +72,8 @@ async function seed() {
         imagePath: image.imagePath,
         originalPrompt: image.originalPrompt,
         difficulty: image.difficulty,
-        active: true,
+        targetWords: image.targetWords,
+        active: image.active,
       });
     }
 

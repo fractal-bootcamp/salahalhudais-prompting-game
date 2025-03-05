@@ -2,13 +2,11 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Skeleton } from "~/components/ui/skeleton"
-import { Loader2, Search, RefreshCw } from "lucide-react"
+import { Loader2, RefreshCw, Maximize2, X } from "lucide-react"
 import Image from "next/image"
-import { api } from "~/trpc/react"
 import { getProximityLabel, getProximityColor, fallbackWordSimilarity } from "~/lib/wordEmbeddings"
 import { useToast } from "~/components/ui/use-toast"
 
@@ -37,7 +35,7 @@ export default function PicktleGame() {
   const [isCorrect, setIsCorrect] = useState(false)
   const [latestGuess, setLatestGuess] = useState<Guess | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [currentImage, setCurrentImage] = useState("/game-images/dalle2_a_serene_underwater__1741120402972.png")
+  const [currentImage, setCurrentImage] = useState("/game-images/default-image.png")
   const [gameData, setGameData] = useState<{
     image: string;
     targetWords: string[];
@@ -46,6 +44,8 @@ export default function PicktleGame() {
   const [isLoadingGame, setIsLoadingGame] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+  const [imageModalOpen, setImageModalOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   // Current target words (from game data)
   const currentTargetWords = gameData?.targetWords || []
@@ -182,6 +182,7 @@ export default function PicktleGame() {
       setInputValue("");
 
       // Check if correct (100% similarity)
+      // Within handleGuess()
       if (similarity === 100) {
         setIsCorrect(true);
         setCorrectSimilarity(similarity);
@@ -193,9 +194,10 @@ export default function PicktleGame() {
           variant: "default",
         });
 
-        // Hide animation after 3 seconds
+        // Hide animation and refresh game automatically after 3 seconds
         setTimeout(() => {
           setShowCorrectAnimation(false);
+          handleRefresh(); // Automatically loads a new image/game round
         }, 3000);
       }
       // Show partial match animation for high similarity
@@ -240,13 +242,173 @@ export default function PicktleGame() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto px-4">
+      {/* Add title section here */}
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold mb-2">Picktle</h1>
+        <p className="text-lg text-muted-foreground">
+          Guess the two words that best describe the image
+        </p>
+      </div>
+
+      {/* Game stats header */}
+      <div className="text-sm text-muted-foreground text-center mb-4">
+        Nearest word similarity: <span className="font-medium">{similarityRanges.nearest}</span>
+      </div>
+
+      {/* Main game area - image and guess interface side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left side - Image */}
+        <div className="bg-gradient-to-br from-card/80 to-card rounded-xl overflow-hidden shadow-lg border border-border/50">
+          <div className="relative aspect-[4/3] w-full">
+            {isLoadingGame ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Skeleton className="h-full w-full" />
+              </div>
+            ) : (
+              <>
+                <div 
+                  className="absolute right-2 top-2 z-10 cursor-pointer rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
+                  onClick={() => setImageModalOpen(true)}
+                >
+                  <Maximize2 size={16} />
+                </div>
+                  <Image
+                    src={currentImage}
+                    alt="Guess the words for this image"
+                    fill
+                    className="object-cover transition-all duration-500 ease-in-out"
+                    sizes="(max-width: 768px) 100vw, 384px"
+                    priority
+                    onError={() => setCurrentImage("/game-images/fallback-image.png")}
+                  />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right side - Guess interface */}
+        <div className="flex flex-col h-full">
+          {/* Top section with difficulty and input */}
+          <div className="bg-gradient-to-br from-card/80 to-card rounded-xl p-4 shadow-lg border border-border/50 mb-4">
+            {/* Difficulty indicator */}
+            <div className="flex items-center gap-2 text-sm mb-3">
+              <span className="text-muted-foreground">Difficulty:</span>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 w-2 rounded-full ${
+                      i < (gameData?.difficulty ?? 0)
+                        ? 'bg-primary'
+                        : 'bg-muted'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Input area */}
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder={`Enter two words... (${gameData?.difficulty === 1 ? 'Pun' :
+                  gameData?.difficulty === 2 ? 'Adj+Noun' : 'Any two'})`}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleGuess()
+                }}
+                disabled={isLoading}
+                className="flex-1 h-8 text-sm bg-background/50 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <Button
+                size="sm"
+                className="h-8 px-3 rounded-md hover:scale-105 transition-transform"
+                onClick={() => void handleGuess()}
+                disabled={isLoading || !inputValue.trim()}
+              >
+                {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Guess'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={handleRefresh}
+                disabled={isLoadingGame || isLoading}
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Latest guess feedback */}
+          {latestGuess && (
+            <div className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-3 mb-4 shadow-sm border border-border/50">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Overall:</span>
+                <span className={getProximityColor(latestGuess.similarity)}>
+                  {latestGuess.similarity}% ({getProximityLabel(latestGuess.similarity)})
+                </span>
+              </div>
+              {latestGuess.wordSimilarities?.map((wordSim, i) => (
+                <div key={i} className="flex justify-between text-sm mt-1">
+                  <span className="text-muted-foreground">{wordSim.word}:</span>
+                  <span className={getProximityColor(wordSim.similarity)}>
+                    {wordSim.similarity}% ({getProximityLabel(wordSim.similarity)})
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Previous guesses - Card-based view with slide-in animation */}
+          <div className="flex-1 bg-gradient-to-br from-card/80 to-card rounded-xl overflow-hidden shadow-lg border border-border/50 p-2 flex flex-col gap-1">
+            {guesses.map((guess) => (
+              <motion.div
+                key={guess.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-2 rounded-md bg-background flex justify-between items-center gap-2 hover:bg-muted/50 transition-colors group"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="font-mono text-xs text-muted-foreground w-6">#{guess.id}</div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-medium text-sm truncate">{guess.words.join(" ")}</span>
+                    <div className="flex gap-2 mt-0.5">
+                      {guess.wordSimilarities?.map((wordSim, i) => (
+                        <div key={i} className="flex items-center gap-1 text-xs">
+                          <span className="text-muted-foreground">{wordSim.word}:</span>
+                          <span className={`${getProximityColor(wordSim.similarity)} font-semibold`}>
+                            {wordSim.similarity}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <div className={`font-mono text-lg font-bold ${getProximityColor(guess.similarity)}`}>
+                    {guess.similarity}%
+                  </div>
+                  <div className={`text-xs ${getProximityColor(guess.similarity)} badge badge-outline px-1.5 py-0.5`}>
+                    {getProximityLabel(guess.similarity)}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Correct answer animation overlay */}
       <AnimatePresence>
         {showCorrectAnimation && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: correctSimilarity / 200 }} // Max opacity 0.5 at 100% similarity
+            animate={{ opacity: correctSimilarity / 200 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-green-500 z-10 pointer-events-none"
           />
@@ -256,259 +418,58 @@ export default function PicktleGame() {
       {/* Correct answer word animation */}
       <AnimatePresence>
         {showCorrectAnimation && isCorrect && (
-          <>
-            <motion.div
-              initial={{ y: -50, x: 0, opacity: 0 }}
-              animate={{ y: 200, x: -100, opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
-            >
-              <span className="text-foreground text-6xl font-bold">{currentTargetWords[0]}</span>
-            </motion.div>
-            <motion.div
-              initial={{ y: -50, x: 0, opacity: 0 }}
-              animate={{ y: 200, x: 100, opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
-            >
-              <span className="text-foreground text-6xl font-bold">{currentTargetWords[1]}</span>
-            </motion.div>
-          </>
+          <motion.div 
+            className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex flex-col items-center gap-4">
+              <motion.div
+                initial={{ y: -50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="text-foreground text-6xl font-bold px-4 py-2 bg-background/80 rounded-lg"
+              >
+                {currentTargetWords[0]}
+              </motion.div>
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="text-foreground text-6xl font-bold px-4 py-2 bg-background/80 rounded-lg"
+              >
+                {currentTargetWords[1]}
+              </motion.div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">PICKTLE</h1>
-          <p className="text-muted-foreground">
-            Guess the two words that describe this image. The nearest word has a similarity of{" "}
-            <span className="font-semibold">{similarityRanges.nearest}</span>, the tenth-nearest has a similarity of{" "}
-            <span className="font-semibold">{similarityRanges.tenthNearest}</span> and the thousandth nearest word has a similarity of{" "}
-            <span className="font-semibold">{similarityRanges.thousandthNearest}</span>
-          </p>
+      {/* Full-size image modal */}
+      {imageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="relative max-h-[90vh] max-w-[90vw] aspect-[16/9]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -right-2 -top-2 z-10"
+              onClick={() => setImageModalOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Image
+              src={currentImage}
+              alt="Full size image"
+              fill
+              className="object-contain"
+              sizes="90vw"
+            />
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Image Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Target Image</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoadingGame ? (
-                <div className="flex aspect-video w-full items-center justify-center">
-                  <Skeleton className="h-64 w-full" />
-                </div>
-              ) : (
-                <div className="relative aspect-video w-full overflow-hidden rounded-md">
-                  <Image
-                    src={currentImage}
-                    alt="Guess the words for this image"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="text-sm text-muted-foreground">
-                Find the two words that best describe this image
-              </div>
-              <Button
-                variant="outline"
-                onClick={handleRefresh}
-                disabled={isLoadingGame || isLoading}
-              >
-                {isLoadingGame ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                New Image
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Guess Input Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Make Your Guess</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Enter two words..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void handleGuess()
-                    }}
-                    disabled={isLoading}
-                    className="flex-1"
-                  />
-                  <Button onClick={() => void handleGuess()} disabled={isLoading || !inputValue.trim()}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Guessing...
-                      </>
-                    ) : (
-                      <>
-                        <Search className="mr-2 h-4 w-4" />
-                        Guess
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  Guess #{guessCount + 1} - Enter exactly two words
-                </div>
-
-                {/* Latest Guess */}
-                {latestGuess && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`p-3 rounded-md border ${
-                      latestGuess.similarity >= 90
-                        ? "border-red-500 bg-red-500/10"
-                        : latestGuess.similarity >= 70
-                        ? "border-orange-500 bg-orange-500/10"
-                        : latestGuess.similarity >= 50
-                        ? "border-yellow-500 bg-yellow-500/10"
-                        : "border-blue-500 bg-blue-500/10"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="flex justify-between items-center">
-                        <div className="font-medium">Overall similarity:</div>
-                        <div className="flex items-center gap-2">
-                          <span>{latestGuess.similarity}%</span>
-                          <span className={getProximityColor(latestGuess.similarity)}>
-                            ({getProximityLabel(latestGuess.similarity)})
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Per-word similarities */}
-                      {latestGuess.wordSimilarities && (
-                        <div className="flex flex-col gap-1 mt-1 text-sm">
-                          {latestGuess.wordSimilarities.map((wordSim, index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="font-medium">{wordSim.word}:</div>
-                              <div className="flex items-center gap-2">
-                                <span>{wordSim.similarity}%</span>
-                                <span className={getProximityColor(wordSim.similarity)}>
-                                  ({getProximityLabel(wordSim.similarity)})
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Progress Bar */}
-                <div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-red-600"
-                      initial={{ width: "0%" }}
-                      animate={{
-                        width: guesses.length > 0 ? `${Math.max(...guesses.map((g) => g.similarity))}%` : "0%",
-                      }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Guesses Table */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Previous Guesses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="pb-2 w-16">#</th>
-                    <th className="pb-2">Guess</th>
-                    <th className="pb-2">Similarity</th>
-                    <th className="pb-2">Word Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <AnimatePresence>
-                    {guesses.map((guess) => (
-                      <motion.tr
-                        key={guess.id}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="border-b"
-                      >
-                        <td className="py-2">{guess.id}</td>
-                        <td className={`py-2 ${guess.isHint ? "text-purple-400" : ""}`}>
-                          {guess.words.join(" ")}
-                          {guess.isHint && <span className="ml-2">💡</span>}
-                        </td>
-                        <td className="py-2">{guess.similarity}%</td>
-                        <td className="py-2">
-                          {guess.wordSimilarities ? (
-                            <div className="flex flex-col">
-                              {guess.wordSimilarities.map((wordSim, index) => (
-                                <div key={index} className="flex items-center gap-1 text-xs">
-                                  <span className="font-medium">{wordSim.word}:</span>
-                                  <span className={getProximityColor(wordSim.similarity)}>
-                                    {wordSim.similarity}%
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className={getProximityColor(guess.similarity)}>
-                              ({getProximityLabel(guess.similarity)})
-                              <div className="inline-block ml-2 w-24 bg-muted rounded-full h-2">
-                                <div
-                                  className="h-full rounded-full bg-green-600"
-                                  style={{
-                                    width: `${(1000 - guess.rank) / 10}%`,
-                                    opacity: 0.5 + (1000 - guess.rank) / 2000,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </div>
   )
 } 

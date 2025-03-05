@@ -123,7 +123,7 @@ export function Navigation() {
                 <NavigationMenuLink 
                   className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/game' ? 'navigation-active' : ''}`}
                 >
-                  Play Game
+                  Guess the Prompt
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
