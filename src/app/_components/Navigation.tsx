@@ -83,6 +83,19 @@ export function Navigation() {
                   <li>
                     <NavigationMenuLink asChild>
                       <a
+                        href="/game/picktle"
+                        className="block select-none space-y-1 rounded-md p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground hover:scale-[1.02]"
+                      >
+                        <div className="text-sm font-medium leading-none">Picktle</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Guess the two words that describe the image
+                        </p>
+                      </a>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <a
                         href="/popular"
                         className="block select-none space-y-1 rounded-md p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground hover:scale-[1.02]"
                       >
@@ -110,7 +123,16 @@ export function Navigation() {
                 <NavigationMenuLink 
                   className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/game' ? 'navigation-active' : ''}`}
                 >
-                  Play Game
+                  Guess the Prompt
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/game/picktle" legacyBehavior passHref>
+                <NavigationMenuLink 
+                  className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/game/picktle' ? 'navigation-active' : ''}`}
+                >
+                  Picktle
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
@@ -120,6 +142,19 @@ export function Navigation() {
         <div className="flex items-center gap-4">
           <ModeToggle />
           <SignedIn>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <Link href="/admin" legacyBehavior passHref>
+                    <NavigationMenuLink 
+                      className={`${navigationMenuTriggerStyle()} text-base transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${pathname === '/admin' ? 'navigation-active' : ''}`}
+                    >
+                      Admin
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
             <UserButton 
               afterSignOutUrl="/"
               appearance={{

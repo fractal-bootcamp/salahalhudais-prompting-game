@@ -93,7 +93,8 @@ export const gameImages = createTable(
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     imagePath: varchar("image_path", { length: 512 }).notNull(),
     originalPrompt: text("original_prompt").notNull(), // The prompt used to generate this image
-    difficulty: integer("difficulty").default(1), // Difficulty level (1-5)
+    targetWords: json("target_words").notNull().$type<string[]>(), // Array of target words for Picktle game
+    difficulty: integer("difficulty").default(1).notNull(), // 1: Easy, 2: Medium, 3: Hard
     active: boolean("active").default(true), // Whether this image is active in the game
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
@@ -225,3 +226,4 @@ export const gameLeaderboardRelations = relations(gameLeaderboard, ({ one }) => 
     relationName: "prompt_leaderboard",
   }),
 }));
+

@@ -5,6 +5,7 @@ import { eq, and, desc, sql, inArray, count, asc, not, like } from "drizzle-orm"
 import { currentUser } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { generateImage, calculateSimilarity } from "~/lib/imageGeneration";
+import { comparePrompts } from "~/lib/imageGeneration";
 
 export const gameRouter = createTRPCRouter({
   // Get a random game image that the user hasn't played yet
@@ -89,7 +90,7 @@ export const gameRouter = createTRPCRouter({
         });
       }
 
-      // Check if the game image exists
+      // Get the game image and its original prompt
       const gameImage = await ctx.db.query.gameImages.findFirst({
         where: eq(gameImages.id, input.gameImageId),
       });
@@ -101,7 +102,14 @@ export const gameRouter = createTRPCRouter({
         });
       }
 
-      // Check if this prompt has been used before for this image
+      if (!gameImage?.originalPrompt) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Game image prompt not found",
+        });
+      }
+
+      // Check if this exact prompt has been used before
       const existingPrompt = await ctx.db.query.gamePrompts.findFirst({
         where: and(
           eq(gamePrompts.gameImageId, input.gameImageId),
@@ -112,40 +120,56 @@ export const gameRouter = createTRPCRouter({
       if (existingPrompt) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This prompt has already been used for this image",
+          message: "This exact prompt has already been used for this image",
         });
       }
 
-      // Generate an image using the prompt
-      const generatedImagePath = await generateImage(input.promptText);
-
-      // Calculate similarity score between the original and generated image
-      const similarityScore = await calculateSimilarity(
-        gameImage.imagePath,
-        generatedImagePath
+      // Compare the user's prompt with the original prompt
+      const similarityScore = await comparePrompts(
+        gameImage.originalPrompt,
+        input.promptText
       );
 
-      // Save the prompt and generated image
+      // Get all existing prompts for this image
+      const existingPrompts = await ctx.db
+        .select({ promptText: gamePrompts.promptText })
+        .from(gamePrompts)
+        .where(eq(gamePrompts.gameImageId, input.gameImageId));
+
+      // Check similarity with existing prompts
+      const existingPromptSimilarities = await Promise.all(
+        existingPrompts.map(p => comparePrompts(p.promptText, input.promptText))
+      );
+
+      // If the prompt is too similar to any existing prompt (>90% similarity)
+      if (existingPromptSimilarities.some(score => score > 90)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Your prompt is too similar to an existing one. Try to be more unique!",
+        });
+      }
+
+      // Save the prompt and score
       const newPrompt = await ctx.db
         .insert(gamePrompts)
         .values({
           gameImageId: input.gameImageId,
           userId: user.id,
           promptText: input.promptText,
-          generatedImagePath,
           similarityScore,
         })
         .returning();
 
-      // If newPrompt[0] is undefined, we can't proceed
-      if (!newPrompt[0]?.id) {
+      if (!newPrompt[0]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create prompt record",
         });
       }
 
-      // Update the leaderboard if this is the user's best score for this image
+      const promptId = newPrompt[0].id;
+
+      // Update leaderboard if this is the user's best score
       const existingLeaderboardEntry = await ctx.db.query.gameLeaderboard.findFirst({
         where: and(
           eq(gameLeaderboard.userId, user.id),
@@ -155,22 +179,20 @@ export const gameRouter = createTRPCRouter({
 
       if (!existingLeaderboardEntry || existingLeaderboardEntry.bestScore < similarityScore) {
         if (existingLeaderboardEntry) {
-          // Update existing entry
           await ctx.db
             .update(gameLeaderboard)
             .set({
               bestScore: similarityScore,
-              promptId: newPrompt[0].id,
+              promptId: promptId,
               updatedAt: new Date(),
             })
             .where(eq(gameLeaderboard.id, existingLeaderboardEntry.id));
         } else {
-          // Create new entry
           await ctx.db.insert(gameLeaderboard).values({
             userId: user.id,
             gameImageId: input.gameImageId,
             bestScore: similarityScore,
-            promptId: newPrompt[0].id,
+            promptId: promptId,
           });
         }
       }
