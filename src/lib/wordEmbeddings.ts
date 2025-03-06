@@ -128,7 +128,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 export async function calculateWordSimilarity(
   targetWords: string[],
   guessWords: string[]
-): Promise<{ similarity: number; rank: string; wordSimilarities: { word: string; similarity: number; targetWord: string }[] }> {
+): Promise<{ similarity: number; rank: number; wordSimilarities: { word: string; similarity: number; targetWord: string }[] }> {
   // Filter out empty strings
   const validTargetWords = targetWords.filter(word => word && word.trim() !== "");
   const validGuessWords = guessWords.filter(word => word && word.trim() !== "");
@@ -137,7 +137,7 @@ export async function calculateWordSimilarity(
   if (validTargetWords.length === 0 || validGuessWords.length === 0) {
     return {
       similarity: 0,
-      rank: "Very Low",
+      rank: 0,
       wordSimilarities: []
     };
   }
@@ -153,7 +153,7 @@ export async function calculateWordSimilarity(
     ) {
       return {
         similarity: 100,
-        rank: "1",
+        rank: 1,
         wordSimilarities: validTargetWords.map((targetWord, i) => ({
           word: validGuessWords[i] ?? "",
           similarity: 100,
@@ -244,7 +244,7 @@ export async function calculateWordSimilarity(
       
       return {
         similarity: Number(overallSimilarity.toFixed(2)),
-        rank: rank.toString(),
+        rank,
         wordSimilarities
       };
     } catch (embeddingError) {

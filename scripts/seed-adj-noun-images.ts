@@ -12,102 +12,102 @@ const __dirname = dirname(__filename);
 // List of adjective-noun images with their target words
 const adjNounImages = [
   {
-    "title": "Polka-Dotted Giraffe",
-    "filename": "polka_dotted_giraffe.png",
-    "prompt": "An image of a charming giraffe covered in colorful polka dots instead of its usual spots",
+    "title": "Velvet Pumpkin",
+    "filename": "velvet_pumpkin.png",
+    "prompt": "Visualize a pumpkin with a lush, velvet surface. Its deep orange hue should contrast beautifully against a clean white background.",
     "targetWords": [
-      "Polka-Dotted",
-      "Giraffe"
+      "velvet",
+      "pumpkin"
     ],
     "difficulty": 1
   },
   {
-    "title": "Glowing Pineapple",
-    "filename": "glowing_pineapple.png",
-    "prompt": "A pineapple that radiates a soft, warm light",
+    "title": "Glassy Penguin",
+    "filename": "glassy_penguin.png",
+    "prompt": "Imagine a penguin made completely out of glass, catching the cold sunlight as it slides on an iceberg.",
     "targetWords": [
-      "Glowing",
-      "Pineapple"
+      "glassy",
+      "penguin"
     ],
     "difficulty": 2
   },
   {
-    "title": "Rainbow Elephant",
-    "filename": "rainbow_elephant.png",
-    "prompt": "A majestic elephant with iridescent, rainbow-colored skin",
+    "title": "Giant Teacup",
+    "filename": "giant_teacup.png",
+    "prompt": "Picture a teacup, large enough for a person to sit in comfortably, filled with steaming hot tea and situated in a quiet, peaceful garden.",
     "targetWords": [
-      "Rainbow",
-      "Elephant"
+      "giant",
+      "teacup"
     ],
     "difficulty": 3
   },
   {
-    "title": "Steampunk Octopus",
-    "filename": "steampunk_octopus.png",
-    "prompt": "An octopus fashioned from brass and gears, a true representation of steampunk aesthetic",
+    "title": "Holographic Castle",
+    "filename": "holographic_castle.png",
+    "prompt": "Envision a castle shimmering in a spectrum of colors, built entirely from holograms. The castle should still feature typical architecture, but with a spectral, ethereal quality.",
     "targetWords": [
-      "Steampunk",
-      "Octopus"
+      "holographic",
+      "castle"
     ],
     "difficulty": 4
   },
   {
-    "title": "Neon Jungle",
-    "filename": "neon_jungle.png",
-    "prompt": "A high-contrast image of a dense jungle where every plant glows with bright neon colors",
+    "title": "Crystal Rainforest",
+    "filename": "crystal_rainforest.png",
+    "prompt": "Imagine a lush rainforest where the foliage, wildlife, and even the rain are all made of glistening, multi-colored crystals.",
     "targetWords": [
-      "Neon",
-      "Jungle"
+      "crystal",
+      "rainforest"
     ],
     "difficulty": 5
   },
   {
-    "title": "Melting Skyline",
-    "filename": "melting_skyline.png",
-    "prompt": "A surreal image of a city skyline seemingly melting into the horizon",
+    "title": "Invisible Symphony",
+    "filename": "invisible_symphony.png",
+    "prompt": "Translate music into visual art. Picture soundwaves transforming into vibrant, invisible threads filling a concert hall with a palpable, mesmerizing energy.",
     "targetWords": [
-      "Melting",
-      "Skyline"
+      "invisible",
+      "symphony"
     ],
     "difficulty": 6
   },
   {
-    "title": "Astral Waterfall",
-    "filename": "astral_waterfall.png",
-    "prompt": "A waterfall cascading from a starry night sky, each droplet a shimmering star itself",
+    "title": "Living Constellation",
+    "filename": "living_constellation.png",
+    "prompt": "Dream of a constellation in the night sky, but the stars are living, glowing creatures, creating an awe-inspiring, organic celestial structure.",
     "targetWords": [
-      "Astral",
-      "Waterfall"
+      "living",
+      "constellation"
     ],
     "difficulty": 7
   },
   {
-    "title": "Tesseract Pyramid",
-    "filename": "tesseract_pyramid.png",
-    "prompt": "An image of a pyramid within a pyramid, both interacting across four dimensions",
+    "title": "Recursive Jungle",
+    "filename": "recursive_jungle.png",
+    "prompt": "Visualize a jungle where each element, from leaves to trees to animals, is a smaller jungle in itself, creating a visually complex, infinite loop of regression.",
     "targetWords": [
-      "Tesseract",
-      "Pyramid"
+      "recursive",
+      "jungle"
     ],
     "difficulty": 8
   },
   {
-    "title": "Quantum Forest",
-    "filename": "quantum_forest.png",
-    "prompt": "A view into a forest where each tree simultaneously exists in multiple states and locations",
+    "title": "Quantum Symphony",
+    "filename": "quantum_symphony.png",
+    "prompt": "Imagine a symphony orchestra where each musician exists in a superposition, creating infinite musical possibilities all playing simultaneously and somehow, harmoniously.",
     "targetWords": [
-      "Quantum",
-      "Forest"
+      "quantum",
+      "symphony"
     ],
     "difficulty": 9
   },
   {
-    "title": "Infinite Kaleidoscope",
-    "filename": "infinite_kaleidoscope.png",
-    "prompt": "The perspective from within a kaleidoscope that extends into infinity, showing a dizzying array of colors and patterns",
+    "title": "Four-Dimensional Labyrinth",
+    "filename": "four_dimensional_labyrinth.png",
+    "prompt": "Picture a labyrinth that not only extends spatially, but also temporally. One can traverse not just left, right, forward, or back, but also forward and backward in time.",
     "targetWords": [
-      "Infinite",
-      "Kaleidoscope"
+      "four-dimensional",
+      "labyrinth"
     ],
     "difficulty": 10
   }

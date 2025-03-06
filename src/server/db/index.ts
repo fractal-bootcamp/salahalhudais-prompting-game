@@ -14,9 +14,7 @@ const globalForDb = globalThis as unknown as {
 
 const connectionString = process.env.DATABASE_URL!;
 const client = postgres(connectionString, {
-  ssl: {
-    rejectUnauthorized: false  // Updated SSL configuration that works
-  }
+  ssl: false,
 });
 
 if (env.NODE_ENV !== "production") globalForDb.conn = client;

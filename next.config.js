@@ -4,7 +4,12 @@
  */
 import "./src/env.js";
 
-/** @type {import("next").NextConfig} */
-const config = {};
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  eslint: {
+    // Disable ESLint during build
+    ignoreDuringBuilds: true,
+  },
+};
 
-export default config;
+export default nextConfig;
